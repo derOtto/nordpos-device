@@ -73,6 +73,16 @@
                     <c:out value="${actionBean.country}" />
                 </div>
             </div>
+            <div class="ui-block-a">
+                <div class="ui-body ui-body-c">
+                    <stripes:label name="label.receipt.printer" />
+                </div>
+            </div>
+            <div class="ui-block-b">
+                <div class="ui-body ui-body-d">
+                    <c:out value="${actionBean.receiptProperty}" />
+                </div>
+            </div>
         </div>
     </stripes:layout-component>
 
