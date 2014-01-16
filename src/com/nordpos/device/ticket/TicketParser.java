@@ -1,21 +1,23 @@
-//    Openbravo POS is a point of sales application designed for touch screens.
-//    Copyright (C) 2008-2009 Openbravo, S.L.
-//    http://www.openbravo.com/product/pos
-//
-//    This file is part of Openbravo POS.
-//
-//    Openbravo POS is free software: you can redistribute it and/or modify
-//    it under the terms of the GNU General Public License as published by
-//    the Free Software Foundation, either version 3 of the License, or
-//    (at your option) any later version.
-//
-//    Openbravo POS is distributed in the hope that it will be useful,
-//    but WITHOUT ANY WARRANTY; without even the implied warranty of
-//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//    GNU General Public License for more details.
-//
-//    You should have received a copy of the GNU General Public License
-//    along with Openbravo POS.  If not, see <http://www.gnu.org/licenses/>.
+/**
+ *
+ * NORD POS is a fork of Openbravo POS.
+ *
+ * Copyright (C) 2009-2013 Nord Trading Ltd. <http://www.nordpos.com>
+ *
+ * This file is part of NORD POS.
+ *
+ * NORD POS is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * NORD POS is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * NORD POS. If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.nordpos.device.ticket;
 
 import com.nordpos.device.receiptprinter.DevicePrinter;
@@ -40,7 +42,9 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
- * @author: Andrey Svininykh <svininykh@gmail.com>
+ *
+ * @author Andrey Svininykh <svininykh@gmail.com>
+ * @version NORD POS 3.0
  */
 public class TicketParser extends DefaultHandler {
 
@@ -53,7 +57,10 @@ public class TicketParser extends DefaultHandler {
 
     private int m_iTextAlign;
     private int m_iTextLength;
-    private int m_iTextStyle;
+
+    private Integer integerCharacterSize;
+    private String sUnderline;
+    private boolean bBold;
 
     private int m_iOutputType;
     private static final int OUTPUT_NONE = 0;
@@ -122,18 +129,23 @@ public class TicketParser extends DefaultHandler {
                 break;
             case OUTPUT_TICKET:
                 if ("line".equals(qName)) {
-                    m_oOutputPrinter.beginLine(parseInt(attributes.getValue("size"), DevicePrinter.SIZE_0));
+                    m_oOutputPrinter.beginLine(parseInteger(attributes.getValue("size")));
                 } else if ("text".equals(qName)) {
                     text = new StringBuffer();
-                    m_iTextStyle = ("true".equals(attributes.getValue("bold")) ? DevicePrinter.STYLE_BOLD : DevicePrinter.STYLE_PLAIN)
-                            | ("true".equals(attributes.getValue("underline")) ? DevicePrinter.STYLE_UNDERLINE : DevicePrinter.STYLE_PLAIN);
-                    String sAlign = readString(attributes.getValue("align"), "left");
-                    if ("right".equals(sAlign)) {
-                        m_iTextAlign = DevicePrinter.ALIGN_RIGHT;
-                    } else if ("center".equals(sAlign)) {
-                        m_iTextAlign = DevicePrinter.ALIGN_CENTER;
-                    } else {
-                        m_iTextAlign = DevicePrinter.ALIGN_LEFT;
+                    integerCharacterSize = parseInteger(attributes.getValue("size"));
+                    sUnderline = readString(attributes.getValue("underline"));
+                    bBold = attributes.getValue("bold").equals("true");
+                    String sAlign = readString(attributes.getValue("align"));
+                    switch (sAlign) {
+                        case "right":
+                            m_iTextAlign = DevicePrinter.ALIGN_RIGHT;
+                            break;
+                        case "center":
+                            m_iTextAlign = DevicePrinter.ALIGN_CENTER;
+                            break;
+                        default:
+                            m_iTextAlign = DevicePrinter.ALIGN_LEFT;
+                            break;
                     }
                     m_iTextLength = parseInt(attributes.getValue("length"), 0);
                 }
@@ -147,30 +159,34 @@ public class TicketParser extends DefaultHandler {
             case OUTPUT_NONE:
                 break;
             case OUTPUT_TICKET:
-                if ("text".equals(qName)) {
-                    if (m_iTextLength > 0) {
-                        switch (m_iTextAlign) {
-                            case DevicePrinter.ALIGN_RIGHT:
-                                m_oOutputPrinter.printText(m_iTextStyle, StringUtils.alignRight(text.toString(), m_iTextLength));
-                                break;
-                            case DevicePrinter.ALIGN_CENTER:
-                                m_oOutputPrinter.printText(m_iTextStyle, StringUtils.alignCenter(text.toString(), m_iTextLength));
-                                break;
-                            default:
-                                m_oOutputPrinter.printText(m_iTextStyle, StringUtils.alignLeft(text.toString(), m_iTextLength));
-                                break;
-                        }
-                    } else {
-                        m_oOutputPrinter.printText(m_iTextStyle, text.toString());
+        switch (qName) {
+            case "text":
+                if (m_iTextLength > 0) {
+                    switch (m_iTextAlign) {
+                        case DevicePrinter.ALIGN_RIGHT:
+                            m_oOutputPrinter.printText(integerCharacterSize, sUnderline, bBold, StringUtils.alignRight(text.toString(), m_iTextLength));
+                            break;
+                        case DevicePrinter.ALIGN_CENTER:
+                            m_oOutputPrinter.printText(integerCharacterSize, sUnderline, bBold, StringUtils.alignCenter(text.toString(), m_iTextLength));
+                            break;
+                        default:
+                            m_oOutputPrinter.printText(integerCharacterSize, sUnderline, bBold, StringUtils.alignLeft(text.toString(), m_iTextLength));
+                            break;
                     }
-                    text = null;
-                } else if ("line".equals(qName)) {
-                    m_oOutputPrinter.endLine();
-                } else if ("ticket".equals(qName)) {
-                    m_oOutputPrinter.endReceipt();
-                    m_iOutputType = OUTPUT_NONE;
-                    m_oOutputPrinter = null;
+                } else {
+                    m_oOutputPrinter.printText(integerCharacterSize, sUnderline, bBold, text.toString());
                 }
+                text = null;
+                break;
+            case "line":
+                m_oOutputPrinter.endLine();
+                break;
+            case "ticket":
+                m_oOutputPrinter.endReceipt();
+                m_iOutputType = OUTPUT_NONE;
+                m_oOutputPrinter = null;
+                break;
+        }
                 break;
         }
     }
@@ -190,8 +206,12 @@ public class TicketParser extends DefaultHandler {
         }
     }
 
-    private int parseInt(String sValue) {
-        return parseInt(sValue, 0);
+    private Integer parseInteger(String sValue) {
+        try {
+            return Integer.parseInt(sValue);
+        } catch (NumberFormatException eNF) {
+            return null;
+        }
     }
 
     private double parseDouble(String sValue, double ddefault) {
@@ -206,19 +226,11 @@ public class TicketParser extends DefaultHandler {
         return parseDouble(sValue, 0.0);
     }
 
-    private String readString(String sValue, String sDefault) {
+    private String readString(String sValue) {
         if (sValue == null || sValue.equals("")) {
-            return sDefault;
+            return null;
         } else {
             return sValue;
-        }
-    }
-
-    private boolean readBoolean(String sValue, boolean bDefault) {
-        if (sValue == null || sValue.equals("")) {
-            return bDefault;
-        } else {
-            return Boolean.parseBoolean(sValue);
         }
     }
 }

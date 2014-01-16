@@ -18,41 +18,32 @@
  * You should have received a copy of the GNU General Public License along with
  * NORD POS. If not, see <http://www.gnu.org/licenses/>.
  */
-package com.nordpos.device.util;
+package com.nordpos.device.escpos;
 
 /**
  *
  * @author Andrey Svininykh <svininykh@gmail.com>
  * @version NORD POS 3.0
  */
-public class StringParser {
+public abstract class Procedures {
 
-    private int currentPosition;
-    private final int maxPosition;
-    private final String str;
+    public abstract byte[] getInitSequence();
 
-    public StringParser(String str) {
-        this.str = str;
-        currentPosition = 0;
-        maxPosition = str == null ? 0 : str.length();
-    }
+    public abstract byte[] getSelectPrinter();
 
-    public String nextToken(char c) {
+    public abstract byte[] getBoldSet();
 
-        if (currentPosition < maxPosition) {
+    public abstract byte[] getBoldReset();
 
-            int start = currentPosition;
-            while (currentPosition < maxPosition && c != str.charAt(currentPosition)) {
-                currentPosition ++;
-            }
+   public abstract byte[] getSizeSet(Integer iCharacterSize);
 
-            if (currentPosition < maxPosition) {
-                return str.substring(start, currentPosition++);
-            } else {
-                return str.substring(start);
-            }
-        } else {
-            return "";
-        }
-    }
+    public abstract byte[] getSizeReset();
+
+    public abstract byte[] getUnderlineSet(String sUnderlineType);
+
+    public abstract byte[] getUnderlineReset();
+
+    public abstract byte[] getCutReceipt();
+
+    public abstract byte[] getNewLine();
 }
