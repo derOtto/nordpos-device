@@ -20,6 +20,8 @@
  */
 package com.nordpos.device.ticket;
 
+import com.nordpos.device.display.DeviceDisplay;
+import com.nordpos.device.display.DeviceDisplayBase;
 import com.nordpos.device.receiptprinter.DevicePrinter;
 import com.nordpos.device.util.StringUtils;
 import com.openbravo.pos.scripting.ScriptEngine;
@@ -62,11 +64,18 @@ public class TicketParser extends DefaultHandler {
     private String sUnderline;
     private boolean bBold;
 
+    private StringBuffer m_sVisorLine;
+    private int m_iVisorAnimation;
+    private String m_sVisorLine1;
+    private String m_sVisorLine2;
+
     private int m_iOutputType;
     private static final int OUTPUT_NONE = 0;
+    private static final int OUTPUT_DISPLAY = 1;
     private static final int OUTPUT_TICKET = 2;
 
-    private DevicePrinter m_oOutputPrinter;
+    private DevicePrinter outputPrinter;
+    private DeviceDisplay outputDisplay;
     private InputStream InputStream;
 
     private static final String PRINTER_SHEMA = "/META-INF/templates/Schema.Printer.xsd";
@@ -77,7 +86,7 @@ public class TicketParser extends DefaultHandler {
 
     public void printTicket(String scriptFile, ScriptEngine script) throws TicketPrinterException, ScriptException {
         InputStream = getClass().getResourceAsStream(scriptFile);
-        String sXML = new Scanner(InputStream,"UTF-8").useDelimiter("\\A").next();
+        String sXML = new Scanner(InputStream, "UTF-8").useDelimiter("\\A").next();
         printTicket(new StringReader(script.eval(sXML).toString()));
     }
 
@@ -109,7 +118,8 @@ public class TicketParser extends DefaultHandler {
     public void startDocument() throws SAXException {
         text = null;
         m_iOutputType = OUTPUT_NONE;
-        m_oOutputPrinter = null;
+        outputPrinter = null;
+        outputDisplay = null;
     }
 
     @Override
@@ -121,33 +131,90 @@ public class TicketParser extends DefaultHandler {
 
         switch (m_iOutputType) {
             case OUTPUT_NONE:
-                if ("ticket".equals(qName)) {
-                    m_iOutputType = OUTPUT_TICKET;
-                    m_oOutputPrinter = printer.getDevicePrinter();
-                    m_oOutputPrinter.beginReceipt();
+                switch (qName) {
+                    case "ticket":
+                        m_iOutputType = OUTPUT_TICKET;
+                        outputPrinter = printer.getDevicePrinter();
+                        outputPrinter.beginReceipt();
+                        break;
+                    case "display":
+                        m_iOutputType = OUTPUT_DISPLAY;
+                        outputDisplay = printer.getDeviceDisplay();
+                        String animation = readString(attributes.getValue("animation"), "none");
+                        switch (animation) {
+                            case "scroll":
+                                m_iVisorAnimation = DeviceDisplayBase.ANIMATION_SCROLL;
+                                break;
+                            case "flyer":
+                                m_iVisorAnimation = DeviceDisplayBase.ANIMATION_FLYER;
+                                break;
+                            case "blink":
+                                m_iVisorAnimation = DeviceDisplayBase.ANIMATION_BLINK;
+                                break;
+                            case "curtain":
+                                m_iVisorAnimation = DeviceDisplayBase.ANIMATION_CURTAIN;
+                                break;
+                            default:
+                                m_iVisorAnimation = DeviceDisplayBase.ANIMATION_NULL;
+                                break;
+                        }
+                        m_sVisorLine1 = null;
+                        m_sVisorLine2 = null;
                 }
                 break;
+
             case OUTPUT_TICKET:
-                if ("line".equals(qName)) {
-                    m_oOutputPrinter.beginLine(parseInteger(attributes.getValue("size")));
-                } else if ("text".equals(qName)) {
-                    text = new StringBuffer();
-                    integerCharacterSize = parseInteger(attributes.getValue("size"));
-                    sUnderline = readString(attributes.getValue("underline"));
-                    bBold = attributes.getValue("bold").equals("true");
-                    String sAlign = readString(attributes.getValue("align"));
-                    switch (sAlign) {
-                        case "right":
-                            m_iTextAlign = DevicePrinter.ALIGN_RIGHT;
-                            break;
-                        case "center":
-                            m_iTextAlign = DevicePrinter.ALIGN_CENTER;
-                            break;
-                        default:
-                            m_iTextAlign = DevicePrinter.ALIGN_LEFT;
-                            break;
-                    }
-                    m_iTextLength = parseInt(attributes.getValue("length"), 0);
+                switch (qName) {
+                    case "line":
+                        outputPrinter.beginLine(parseInteger(attributes.getValue("size")));
+                        break;
+                    case "text":
+                        text = new StringBuffer();
+                        integerCharacterSize = parseInteger(attributes.getValue("size"));
+                        sUnderline = readString(attributes.getValue("underline"));
+                        bBold = attributes.getValue("bold").equals("true");
+                        String sAlign = readString(attributes.getValue("align"));
+                        switch (sAlign) {
+                            case "right":
+                                m_iTextAlign = DevicePrinter.ALIGN_RIGHT;
+                                break;
+                            case "center":
+                                m_iTextAlign = DevicePrinter.ALIGN_CENTER;
+                                break;
+                            default:
+                                m_iTextAlign = DevicePrinter.ALIGN_LEFT;
+                                break;
+                        }
+                        m_iTextLength = parseInt(attributes.getValue("length"), 0);
+                }
+                break;
+            case OUTPUT_DISPLAY:
+                switch (qName) {
+                    case "line":
+                        m_sVisorLine = new StringBuffer();
+                        break;
+                    case "line1":
+                        m_sVisorLine = new StringBuffer();
+                        break;
+                    case "line2":
+                        m_sVisorLine = new StringBuffer();
+                        break;
+                    case "text":
+                        text = new StringBuffer();
+                        String sAlign = readString(attributes.getValue("align"), "center");
+                        switch (sAlign) {
+                            case "right":
+                                m_iTextAlign = DevicePrinter.ALIGN_RIGHT;
+                                break;
+                            case "center":
+                                m_iTextAlign = DevicePrinter.ALIGN_CENTER;
+                                break;
+                            default:
+                                m_iTextAlign = DevicePrinter.ALIGN_LEFT;
+                                break;
+                        }
+                        m_iTextLength = parseInt(attributes.getValue("length"), 0);
+                        break;
                 }
                 break;
         }
@@ -159,35 +226,82 @@ public class TicketParser extends DefaultHandler {
             case OUTPUT_NONE:
                 break;
             case OUTPUT_TICKET:
-        switch (qName) {
-            case "text":
-                if (m_iTextLength > 0) {
-                    switch (m_iTextAlign) {
-                        case DevicePrinter.ALIGN_RIGHT:
-                            m_oOutputPrinter.printText(integerCharacterSize, sUnderline, bBold, StringUtils.alignRight(text.toString(), m_iTextLength));
-                            break;
-                        case DevicePrinter.ALIGN_CENTER:
-                            m_oOutputPrinter.printText(integerCharacterSize, sUnderline, bBold, StringUtils.alignCenter(text.toString(), m_iTextLength));
-                            break;
-                        default:
-                            m_oOutputPrinter.printText(integerCharacterSize, sUnderline, bBold, StringUtils.alignLeft(text.toString(), m_iTextLength));
-                            break;
-                    }
-                } else {
-                    m_oOutputPrinter.printText(integerCharacterSize, sUnderline, bBold, text.toString());
+                switch (qName) {
+                    case "text":
+                        if (m_iTextLength > 0) {
+                            switch (m_iTextAlign) {
+                                case DevicePrinter.ALIGN_RIGHT:
+                                    outputPrinter.printText(integerCharacterSize, sUnderline, bBold, StringUtils.alignRight(text.toString(), m_iTextLength));
+                                    break;
+                                case DevicePrinter.ALIGN_CENTER:
+                                    outputPrinter.printText(integerCharacterSize, sUnderline, bBold, StringUtils.alignCenter(text.toString(), m_iTextLength));
+                                    break;
+                                default:
+                                    outputPrinter.printText(integerCharacterSize, sUnderline, bBold, StringUtils.alignLeft(text.toString(), m_iTextLength));
+                                    break;
+                            }
+                        } else {
+                            outputPrinter.printText(integerCharacterSize, sUnderline, bBold, text.toString());
+                        }
+                        text = null;
+                        break;
+                    case "line":
+                        outputPrinter.endLine();
+                        break;
+                    case "ticket":
+                        outputPrinter.endReceipt();
+                        m_iOutputType = OUTPUT_NONE;
+                        outputPrinter = null;
+                        break;
                 }
-                text = null;
                 break;
-            case "line":
-                m_oOutputPrinter.endLine();
+            case OUTPUT_DISPLAY:
+                switch (qName) {
+                    case "line":
+                        if (m_sVisorLine1 == null) {
+                            m_sVisorLine1 = m_sVisorLine.toString();
+                        } else {
+                            m_sVisorLine2 = m_sVisorLine.toString();
+                        }
+                        m_sVisorLine = null;
+                        break;
+                    case "line1":
+                        m_sVisorLine1 = m_sVisorLine.toString();
+                        m_sVisorLine = null;
+                        break;
+                    case "line2":
+                        m_sVisorLine2 = m_sVisorLine.toString();
+                        m_sVisorLine = null;
+                        break;
+                    case "text":
+                        if (m_iTextLength > 0) {
+                            switch (m_iTextAlign) {
+                                case DevicePrinter.ALIGN_RIGHT:
+                                    m_sVisorLine.append(StringUtils.alignRight(text.toString(), m_iTextLength));
+                                    break;
+                                case DevicePrinter.ALIGN_CENTER:
+                                    m_sVisorLine.append(StringUtils.alignCenter(text.toString(), m_iTextLength));
+                                    break;
+                                default: // DevicePrinter.ALIGN_LEFT
+                                    m_sVisorLine.append(StringUtils.alignLeft(text.toString(), m_iTextLength));
+                                    break;
+                            }
+                        } else {
+                            m_sVisorLine.append(text);
+                        }
+                        text = null;
+                        break;
+                    case "display":
+                        outputDisplay.writeVisor(m_iVisorAnimation, m_sVisorLine1, m_sVisorLine2);
+                        m_iVisorAnimation = DeviceDisplayBase.ANIMATION_NULL;
+                        m_sVisorLine1 = null;
+                        m_sVisorLine2 = null;
+                        m_iOutputType = OUTPUT_NONE;
+                        outputDisplay = null;
+                        break;
+                }
                 break;
-            case "ticket":
-                m_oOutputPrinter.endReceipt();
-                m_iOutputType = OUTPUT_NONE;
-                m_oOutputPrinter = null;
-                break;
-        }
-                break;
+
         }
     }
 
@@ -229,6 +343,14 @@ public class TicketParser extends DefaultHandler {
     private String readString(String sValue) {
         if (sValue == null || sValue.equals("")) {
             return null;
+        } else {
+            return sValue;
+        }
+    }
+
+    private String readString(String sValue, String sDefault) {
+        if (sValue == null || sValue.equals("")) {
+            return sDefault;
         } else {
             return sValue;
         }
