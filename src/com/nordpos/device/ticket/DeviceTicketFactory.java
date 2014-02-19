@@ -20,9 +20,12 @@
  */
 package com.nordpos.device.ticket;
 
+import com.nordpos.device.DisplayInterface;
 import com.nordpos.device.receiptprinter.DevicePrinter;
 import com.nordpos.device.receiptprinter.DevicePrinterNull;
 import com.nordpos.device.ReceiptPrinterInterface;
+import com.nordpos.device.display.DeviceDisplay;
+import com.nordpos.device.display.DeviceDisplayNull;
 import java.util.ServiceLoader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,24 +40,57 @@ public class DeviceTicketFactory {
     private static final Logger logger = Logger.getLogger(DeviceTicketFactory.class.getName());
 
     private DevicePrinter devicePrinter;
+    private DeviceDisplay deviceDisplay;
 
-    public DeviceTicketFactory(String sProperty) {
+    private String sReceiptPrinterParam;
+    private String sDisplayParam;
 
+    public DeviceTicketFactory() {
         devicePrinter = new DevicePrinterNull();
+        deviceDisplay = new DeviceDisplayNull();
+    }
 
+    public DevicePrinter getDevicePrinter() {
         ServiceLoader<ReceiptPrinterInterface> receiptPrinterLoader = ServiceLoader.load(ReceiptPrinterInterface.class);
-
         for (ReceiptPrinterInterface machineInterface : receiptPrinterLoader) {
             try {
-                devicePrinter = machineInterface.getReceiptPrinter(sProperty);
+                devicePrinter = machineInterface.getReceiptPrinter(getReceiptPrinterParameter());
             } catch (Exception e) {
+                devicePrinter = new DevicePrinterNull();
                 logger.log(Level.WARNING, e.getMessage(), e);
             }
         }
 
+        return devicePrinter;
     }
 
-    public DevicePrinter getDevicePrinter() {
-        return devicePrinter;
+    public String getReceiptPrinterParameter() {
+        return sReceiptPrinterParam;
+    }
+
+    public void setReceiptPrinterParameter(String sReceiptPrinterParam) {
+        this.sReceiptPrinterParam = sReceiptPrinterParam;
+    }
+
+    public String getDisplayParameter() {
+        return sDisplayParam;
+    }
+
+    public void setDisplayParameter(String sDisplayParam) {
+        this.sDisplayParam = sDisplayParam;
+    }
+
+    public DeviceDisplay getDeviceDisplay() {
+        ServiceLoader<DisplayInterface> displayLoader = ServiceLoader.load(DisplayInterface.class);
+
+        for (DisplayInterface machineInterface : displayLoader) {
+            try {
+                deviceDisplay = machineInterface.getDisplay(sDisplayParam);
+            } catch (Exception e) {
+                deviceDisplay = new DeviceDisplayNull();
+                logger.log(Level.WARNING, e.getMessage(), e);
+            }
+        }
+        return deviceDisplay;
     }
 }
