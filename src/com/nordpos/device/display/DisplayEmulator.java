@@ -34,10 +34,6 @@ public class DisplayEmulator implements DisplayInterface {
         StringParser displayProperty = new StringParser(sProperty);
         String sDisplayType = displayProperty.nextToken(':');
         switch (sDisplayType) {
-            case "screen":
-                return new DeviceDisplayPanel();
-            case "window":
-                return new DeviceDisplayWindow();
             default:
                 return new DeviceDisplayNull();
         }
