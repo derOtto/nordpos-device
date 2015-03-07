@@ -20,9 +20,9 @@
  */
 package com.nordpos.device.receiptprinter;
 
-import com.nordpos.device.ReceiptPrinterInterface;
 import com.nordpos.device.util.StringParser;
 import com.nordpos.device.writter.WritterFile;
+import java.awt.Component;
 
 /**
  *
@@ -30,8 +30,8 @@ import com.nordpos.device.writter.WritterFile;
  */
 public class ReceiptPrinterEmulator implements ReceiptPrinterInterface {
 
-    private static final byte[] EOL_DOS = {0x0D, 0x0A}; // Print and carriage return
-    private static final byte[] EOL_UNIX = {0x0A};
+    public static final byte[] EOL_DOS = {0x0D, 0x0A}; // Print and carriage return
+    public static final byte[] EOL_UNIX = {0x0A};
 
     @Override
     public DevicePrinter getReceiptPrinter(String sProperty) throws Exception {
@@ -53,6 +53,17 @@ public class ReceiptPrinterEmulator implements ReceiptPrinterInterface {
                 } else {
                     return new DevicePrinterNull();
                 }
+            default:
+                return new DevicePrinterNull();
+        }
+    }
+
+    @Override
+    public DevicePrinter getReceiptPrinter(Component awtComponent, String sProperty, PaperFormat paperFormat) throws Exception {
+        StringParser sp = new StringParser(sProperty);
+        String sPrinterType = sp.nextToken(':');
+        String sPrinterParam1 = sp.nextToken(',');
+        switch (sPrinterType) {
             default:
                 return new DevicePrinterNull();
         }

@@ -18,17 +18,14 @@
  * You should have received a copy of the GNU General Public License along with
  * NORD POS. If not, see <http://www.gnu.org/licenses/>.
  */
-package com.nordpos.device;
-
-import com.nordpos.device.receiptprinter.DevicePrinter;
+package com.nordpos.device.display;
 
 /**
  *
  * @author Andrey Svininykh <svininykh@gmail.com>
  * @version NORD POS 3.0
  */
-public interface ReceiptPrinterInterface {
+public interface DisplayInterface {
 
-    public DevicePrinter getReceiptPrinter(String sProperty) throws Exception;
-
+    public DeviceDisplay getDisplay(String sProperty) throws Exception;
 }

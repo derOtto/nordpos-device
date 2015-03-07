@@ -22,6 +22,7 @@ package com.nordpos.device.receiptprinter;
 
 import com.nordpos.device.ticket.TicketPrinterException;
 import com.nordpos.device.writter.Writter;
+import java.awt.image.BufferedImage;
 
 /**
  *
@@ -79,6 +80,22 @@ public class DevicePrinterPlainText implements DevicePrinter {
         out.write(bEndOfLine);
         out.write(bEndOfLine);
         out.flush();
+    }
+
+    @Override
+    public void printImage(BufferedImage image) {
+    }
+
+    @Override
+    public void printBarCode(String type, String position, String code) {
+    }
+
+    @Override
+    public void cutPaper(boolean complete) {
+    }
+
+    @Override
+    public void openDrawer() {
     }
 
 }

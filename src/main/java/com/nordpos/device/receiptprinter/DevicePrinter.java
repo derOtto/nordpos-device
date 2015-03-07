@@ -20,6 +20,8 @@
  */
 package com.nordpos.device.receiptprinter;
 
+import java.awt.image.BufferedImage;
+
 /**
  *
  * @author Andrey Svininykh <svininykh@gmail.com>
@@ -31,13 +33,30 @@ public interface DevicePrinter {
     public static final int ALIGN_RIGHT = 1;
     public static final int ALIGN_CENTER = 2;
 
+    public static final String BARCODE_EAN8 = "EAN8";
+    public static final String BARCODE_EAN13 = "EAN13";
+    public static final String BARCODE_CODE39 = "CODE39";
+    public static final String BARCODE_CODE128 = "CODE128";
+    public static final String BARCODE_DATAMATRIX = "DATAMATRIX";
+    public static final String BARCODE_QRCODE = "QRCODE";
+
+    public static final String POSITION_TOP = "top";
+    public static final String POSITION_BOTTOM = "bottom";
+    public static final String POSITION_NONE = "none";
+
+    // INTERFAZ DESCRIPCION
     public String getPrinterName();
     public String getPrinterDescription();
     public void reset();
 
     public void beginReceipt();
+    public void printImage(BufferedImage image);
+    public void printBarCode(String type, String position, String code);
     public void beginLine(Integer iTextSize);
     public void printText(Integer iCharacterSize, String sUnderlineType, Boolean bBold, String sText);
     public void endLine();
     public void endReceipt();
+
+    public void cutPaper(boolean complete);
+    public void openDrawer();
 }

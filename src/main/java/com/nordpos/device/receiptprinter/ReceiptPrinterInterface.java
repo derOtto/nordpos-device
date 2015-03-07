@@ -18,16 +18,18 @@
  * You should have received a copy of the GNU General Public License along with
  * NORD POS. If not, see <http://www.gnu.org/licenses/>.
  */
-package com.nordpos.device;
+package com.nordpos.device.receiptprinter;
 
-import com.nordpos.device.display.DeviceDisplay;
+import java.awt.Component;
 
 /**
  *
  * @author Andrey Svininykh <svininykh@gmail.com>
  * @version NORD POS 3.0
  */
-public interface DisplayInterface {
+public interface ReceiptPrinterInterface {
 
-    public DeviceDisplay getDisplay(String sProperty) throws Exception;
+    public DevicePrinter getReceiptPrinter(String sProperty) throws Exception;
+
+    public DevicePrinter getReceiptPrinter(Component awtComponent, String sProperty, PaperFormat paperFormat) throws Exception;
 }

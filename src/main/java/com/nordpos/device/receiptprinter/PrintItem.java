@@ -17,36 +17,12 @@
 //    You should have received a copy of the GNU General Public License
 //    along with Openbravo POS.  If not, see <http://www.gnu.org/licenses/>.
 
-package com.nordpos.device.display;
+package com.nordpos.device.receiptprinter;
 
-import com.nordpos.device.util.StringUtils;
+import java.awt.Graphics2D;
 
-/**
- *
- * @author adrianromero
- */
-
-public class NullAnimator implements DisplayAnimator {
-
-    protected String currentLine1;
-    protected String currentLine2;
-
-    public NullAnimator(String line1, String line2) {
-        currentLine1 = StringUtils.alignLeft(line1, 20);
-        currentLine2 = StringUtils.alignLeft(line2, 20);
-    }
-
-    @Override
-    public void setTiming(int i) {
-    }
-
-    @Override
-    public String getLine1() {
-        return currentLine1;
-    }
-
-    @Override
-    public String getLine2() {
-        return currentLine2;
-    }
+public interface PrintItem {
+    
+    public int getHeight();
+    public void draw(Graphics2D g, int x, int y, int width);
 }

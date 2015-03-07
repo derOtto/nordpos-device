@@ -17,34 +17,36 @@
 //    You should have received a copy of the GNU General Public License
 //    along with Openbravo POS.  If not, see <http://www.gnu.org/licenses/>.
 
-package com.nordpos.device.display;
+package com.nordpos.device.receiptprinter;
 
-import com.nordpos.device.util.StringUtils;
+import java.awt.Font;
+import java.awt.geom.AffineTransform;
 
 /**
  *
+ * @author jaroslawwozniak
  * @author adrianromero
  */
+public class BasicTicketForPrinter extends BasicTicket {
 
-public class ScrollAnimator extends BaseAnimator {
+//        private static BASEFONT = new Font("Monospaced", Font.PLAIN, 7).deriveFont(AffineTransform.getScaleInstance(1.0, 1.50));
+//        private static int FONTHEIGHT = 14;
+        private static Font BASEFONT = new Font("Monospaced", Font.PLAIN, 7).deriveFont(AffineTransform.getScaleInstance(1.0, 1.40));
+        private static int FONTHEIGHT = 12;
+        private static double IMAGE_SCALE = 0.65;
 
-    private final int msglength;
-
-    public ScrollAnimator(String line1, String line2) {
-        msglength = Math.max(line1.length(), line2.length());
-        baseLine1 = StringUtils.alignLeft(line1, msglength);
-        baseLine2 = StringUtils.alignLeft(line2, msglength);
+    @Override
+    protected Font getBaseFont() {
+        return BASEFONT;
     }
 
     @Override
-    public void setTiming(int i) {
-        int j = (i / 2) % (msglength + 20);
-        if (j < 20) {
-            currentLine1 = StringUtils.alignLeft(StringUtils.getWhiteString(20 - j) + baseLine1, 20);
-            currentLine2 = StringUtils.alignLeft(StringUtils.getWhiteString(20 - j) + baseLine2, 20);
-        } else {
-            currentLine1 = StringUtils.alignLeft(baseLine1.substring(j - 20), 20);
-            currentLine2 = StringUtils.alignLeft(baseLine2.substring(j - 20), 20);
-        }
+    protected int getFontHeight() {
+        return FONTHEIGHT;
+    }
+
+    @Override
+    protected double getImageScale() {
+        return IMAGE_SCALE;
     }
 }

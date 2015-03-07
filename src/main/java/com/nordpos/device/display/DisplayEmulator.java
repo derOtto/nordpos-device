@@ -20,7 +20,6 @@
  */
 package com.nordpos.device.display;
 
-import com.nordpos.device.DisplayInterface;
 import com.nordpos.device.util.StringParser;
 
 /**

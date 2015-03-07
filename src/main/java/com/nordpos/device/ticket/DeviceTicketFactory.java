@@ -20,12 +20,12 @@
  */
 package com.nordpos.device.ticket;
 
-import com.nordpos.device.DisplayInterface;
 import com.nordpos.device.receiptprinter.DevicePrinter;
 import com.nordpos.device.receiptprinter.DevicePrinterNull;
-import com.nordpos.device.ReceiptPrinterInterface;
 import com.nordpos.device.display.DeviceDisplay;
 import com.nordpos.device.display.DeviceDisplayNull;
+import com.nordpos.device.display.DisplayInterface;
+import com.nordpos.device.receiptprinter.ReceiptPrinterInterface;
 import java.util.ServiceLoader;
 import java.util.logging.Level;
 import java.util.logging.Logger;

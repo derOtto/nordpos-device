@@ -17,36 +17,31 @@
 //    You should have received a copy of the GNU General Public License
 //    along with Openbravo POS.  If not, see <http://www.gnu.org/licenses/>.
 
-package com.nordpos.device.display;
+package com.nordpos.device.receiptprinter;
 
-import com.nordpos.device.util.StringUtils;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 
-/**
- *
- * @author adrianromero
- */
+public class PrintItemImage implements PrintItem {
 
-public class NullAnimator implements DisplayAnimator {
+    protected BufferedImage image;
+    protected double scale;
 
-    protected String currentLine1;
-    protected String currentLine2;
-
-    public NullAnimator(String line1, String line2) {
-        currentLine1 = StringUtils.alignLeft(line1, 20);
-        currentLine2 = StringUtils.alignLeft(line2, 20);
+    /** Creates a new instance of PrintItemImage
+     * @param image
+     */
+    public PrintItemImage(BufferedImage image, double scale) {
+        this.image = image;
+        this.scale = scale;
     }
 
     @Override
-    public void setTiming(int i) {
+    public void draw(Graphics2D g, int x, int y, int width) {
+        g.drawImage(image, x + (width - (int)(image.getWidth() * scale)) / 2, y, (int)(image.getWidth() * scale), (int)(image.getHeight() * scale), null);
     }
 
     @Override
-    public String getLine1() {
-        return currentLine1;
-    }
-
-    @Override
-    public String getLine2() {
-        return currentLine2;
+    public int getHeight() {
+        return (int) (image.getHeight() * scale);
     }
 }

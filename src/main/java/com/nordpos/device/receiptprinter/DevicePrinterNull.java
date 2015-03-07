@@ -58,6 +58,14 @@ public class DevicePrinterNull implements DevicePrinter {
     }
 
     @Override
+    public void printBarCode(String type, String position, String code) {
+    }
+
+    @Override
+    public void printImage(java.awt.image.BufferedImage image) {
+    }
+
+    @Override
     public void beginLine(Integer iTextSize) {
     }
 
@@ -71,6 +79,14 @@ public class DevicePrinterNull implements DevicePrinter {
 
     @Override
     public void endReceipt() {
+    }
+
+    @Override
+    public void openDrawer() {
+    }
+
+    @Override
+    public void cutPaper(boolean complete) {
     }
 
 }

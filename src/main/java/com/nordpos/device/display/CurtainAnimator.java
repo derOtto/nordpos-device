@@ -20,12 +20,12 @@
 
 package com.nordpos.device.display;
 
+import com.nordpos.device.util.StringUtils;
+
 /**
  *
  * @author adrianromero
  */
-
-import com.nordpos.device.util.StringUtils;
 
 public class CurtainAnimator extends BaseAnimator {
 
@@ -34,6 +34,7 @@ public class CurtainAnimator extends BaseAnimator {
         baseLine2 = StringUtils.alignLeft(line2, 20);
     }
 
+    @Override
     public void setTiming(int i) {
 
         int j = i / 2;
