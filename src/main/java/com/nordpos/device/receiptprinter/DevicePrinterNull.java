@@ -20,6 +20,8 @@
  */
 package com.nordpos.device.receiptprinter;
 
+import java.awt.image.BufferedImage;
+
 /**
  *
  * @author Andrey Svininykh <svininykh@gmail.com>
@@ -48,6 +50,11 @@ public class DevicePrinterNull implements DevicePrinter {
     public String getPrinterDescription() {
         return m_sDescription;
     }
+    
+    @Override
+    public BufferedImage getPrinterPreview() {
+        return null;
+    }    
 
     @Override
     public void reset() {

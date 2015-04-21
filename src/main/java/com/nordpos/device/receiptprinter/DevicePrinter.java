@@ -46,17 +46,28 @@ public interface DevicePrinter {
 
     // INTERFAZ DESCRIPCION
     public String getPrinterName();
+
     public String getPrinterDescription();
+
+    public BufferedImage getPrinterPreview();
+
     public void reset();
 
     public void beginReceipt();
+
     public void printImage(BufferedImage image);
+
     public void printBarCode(String type, String position, String code);
+
     public void beginLine(Integer iTextSize);
+
     public void printText(Integer iCharacterSize, String sUnderlineType, Boolean bBold, String sText);
+
     public void endLine();
+
     public void endReceipt();
 
     public void cutPaper(boolean complete);
+
     public void openDrawer();
 }

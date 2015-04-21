@@ -2,7 +2,7 @@
  *
  * NORD POS is a fork of Openbravo POS.
  *
- * Copyright (C) 2009-2013 Nord Trading Ltd. <http://www.nordpos.com>
+ * Copyright (C) 2009-2015 Nord Trading Ltd. <http://www.nordpos.com>
  *
  * This file is part of NORD POS.
  *
@@ -20,79 +20,78 @@
  */
 package com.nordpos.device.receiptprinter;
 
-import com.nordpos.device.ticket.TicketPrinterException;
-import com.nordpos.device.writter.Writter;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 /**
- *
  * @author Andrey Svininykh <svininykh@gmail.com>
  * @version NORD POS 3.0
  */
-public class DevicePrinterPlainText implements DevicePrinter {
+public class DevicePrinterImage implements DevicePrinter {
 
-    private final byte[] bEndOfLine;
-
-    private final Writter out;
-
-    public DevicePrinterPlainText(Writter CommOutputPrinter, byte[] bEndOfLine) throws TicketPrinterException {
-        out = CommOutputPrinter;
-        this.bEndOfLine = bEndOfLine;
-    }
+    private BasicTicket m_ticketcurrent;
+    private PreviewBasicTicket previewBasicTicket;
+    private int lineCount = 0;
 
     @Override
     public String getPrinterName() {
-        return "label.ReceiptPrinterPlainText";
+        return null;
     }
 
     @Override
     public String getPrinterDescription() {
         return null;
     }
-    
+
     @Override
     public BufferedImage getPrinterPreview() {
-        return null;
-    }    
+        try {
+            return previewBasicTicket.paint();
+        } catch (IOException ex) {
+            return null;
+        }
+    }
 
     @Override
     public void reset() {
+        m_ticketcurrent = null;
     }
 
     @Override
     public void beginReceipt() {
+        m_ticketcurrent = new BasicTicketForScreen();
     }
 
     @Override
     public void beginLine(Integer iTextSize) {
+        lineCount = lineCount + 1;
+        m_ticketcurrent.beginLine(iTextSize);
     }
 
     @Override
     public void printText(Integer iCharacterSize, String sUnderlineType, Boolean bBold, String sText) {
-        out.write(sText);
+        m_ticketcurrent.printText(iCharacterSize, sText);
     }
 
     @Override
     public void endLine() {
-        out.write(bEndOfLine);
+        m_ticketcurrent.endLine();
     }
 
     @Override
     public void endReceipt() {
-        out.write(bEndOfLine);
-        out.write(bEndOfLine);
-        out.write(bEndOfLine);
-        out.write(bEndOfLine);
-        out.write(bEndOfLine);
-        out.flush();
-    }
-
-    @Override
-    public void printImage(BufferedImage image) {
+        previewBasicTicket = new PreviewBasicTicket(m_ticketcurrent, 1, 1, 320, 32 * lineCount);
+        m_ticketcurrent = null;
     }
 
     @Override
     public void printBarCode(String type, String position, String code) {
+        m_ticketcurrent.printBarCode(type, position, code);
+    }
+
+    @Override
+    public void printImage(BufferedImage image) {
+        m_ticketcurrent.printImage(image);
     }
 
     @Override
@@ -102,5 +101,4 @@ public class DevicePrinterPlainText implements DevicePrinter {
     @Override
     public void openDrawer() {
     }
-
 }
