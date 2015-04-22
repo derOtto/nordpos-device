@@ -21,6 +21,7 @@ package com.nordpos.device.ticket;
 import com.nordpos.device.display.DeviceDisplay;
 import com.nordpos.device.display.DeviceDisplayBase;
 import com.nordpos.device.receiptprinter.DevicePrinter;
+import com.nordpos.device.receiptprinter.ReceiptPrinterEmulator;
 import com.nordpos.device.util.StringUtils;
 import com.openbravo.pos.scripting.ScriptEngine;
 import com.openbravo.pos.scripting.ScriptException;
@@ -54,7 +55,7 @@ public class TicketParser extends DefaultHandler {
     private StringBuffer text;
     private int m_iTextAlign;
     private int m_iTextLength;
-    private Integer integerCharacterSize;
+    private int iCharacterSize;
     private String sUnderline;
     private boolean bBold;
     private StringBuffer m_sVisorLine;
@@ -151,11 +152,11 @@ public class TicketParser extends DefaultHandler {
             case OUTPUT_TICKET:
                 switch (qName) {
                     case "line":
-                        outputPrinter.beginLine(parseInteger(attributes.getValue("size")));
+                        outputPrinter.beginLine(parseInt(attributes.getValue("size"), 0));
                         break;
                     case "text":
                         text = new StringBuffer();
-                        integerCharacterSize = parseInteger(attributes.getValue("size"));
+                        iCharacterSize = parseInt(attributes.getValue("size"), 0);
                         sUnderline = readString(attributes.getValue("underline"));
                         bBold = attributes.getValue("bold").equals("true");
                         String sAlign = readString(attributes.getValue("align"));
@@ -216,17 +217,17 @@ public class TicketParser extends DefaultHandler {
                         if (m_iTextLength > 0) {
                             switch (m_iTextAlign) {
                                 case DevicePrinter.ALIGN_RIGHT:
-                                    outputPrinter.printText(integerCharacterSize, sUnderline, bBold, StringUtils.alignRight(text.toString(), m_iTextLength));
+                                    outputPrinter.printText(iCharacterSize, sUnderline, bBold, StringUtils.alignRight(text.toString(), m_iTextLength));
                                     break;
                                 case DevicePrinter.ALIGN_CENTER:
-                                    outputPrinter.printText(integerCharacterSize, sUnderline, bBold, StringUtils.alignCenter(text.toString(), m_iTextLength));
+                                    outputPrinter.printText(iCharacterSize, sUnderline, bBold, StringUtils.alignCenter(text.toString(), m_iTextLength));
                                     break;
                                 default:
-                                    outputPrinter.printText(integerCharacterSize, sUnderline, bBold, StringUtils.alignLeft(text.toString(), m_iTextLength));
+                                    outputPrinter.printText(iCharacterSize, sUnderline, bBold, StringUtils.alignLeft(text.toString(), m_iTextLength));
                                     break;
                             }
                         } else {
-                            outputPrinter.printText(integerCharacterSize, sUnderline, bBold, text.toString());
+                            outputPrinter.printText(iCharacterSize, sUnderline, bBold, text.toString());
                         }
                         text = null;
                         break;
@@ -236,7 +237,7 @@ public class TicketParser extends DefaultHandler {
                     case "ticket":
                         outputPrinter.endReceipt();
                         m_iOutputType = OUTPUT_NONE;
-                        outputPrinter = null;
+//                        outputPrinter = null;
                         break;
                 }
                 break;
@@ -296,19 +297,19 @@ public class TicketParser extends DefaultHandler {
         }
     }
 
+    public DevicePrinter getPrinterOut() {
+        return outputPrinter;
+    }
+
+    public DeviceDisplay getDisplayOut() {
+        return outputDisplay;
+    }
+
     private int parseInt(String sValue, int iDefault) {
         try {
             return Integer.parseInt(sValue);
         } catch (NumberFormatException eNF) {
             return iDefault;
-        }
-    }
-
-    private Integer parseInteger(String sValue) {
-        try {
-            return Integer.parseInt(sValue);
-        } catch (NumberFormatException eNF) {
-            return null;
         }
     }
 

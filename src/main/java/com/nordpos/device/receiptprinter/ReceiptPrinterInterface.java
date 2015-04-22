@@ -20,8 +20,6 @@
  */
 package com.nordpos.device.receiptprinter;
 
-import java.awt.Component;
-
 /**
  *
  * @author Andrey Svininykh <svininykh@gmail.com>
@@ -31,5 +29,4 @@ public interface ReceiptPrinterInterface {
 
     public DevicePrinter getReceiptPrinter(String sProperty) throws Exception;
 
-    public DevicePrinter getReceiptPrinter(Component awtComponent, String sProperty, PaperFormat paperFormat) throws Exception;
 }

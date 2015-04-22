@@ -22,7 +22,6 @@ package com.nordpos.device.receiptprinter;
 
 import com.nordpos.device.util.StringParser;
 import com.nordpos.device.writter.WritterFile;
-import java.awt.Component;
 
 /**
  *
@@ -53,17 +52,8 @@ public class ReceiptPrinterEmulator implements ReceiptPrinterInterface {
                 } else {
                     return new DevicePrinterNull();
                 }
-            default:
-                return new DevicePrinterNull();
-        }
-    }
-
-    @Override
-    public DevicePrinter getReceiptPrinter(Component awtComponent, String sProperty, PaperFormat paperFormat) throws Exception {
-        StringParser sp = new StringParser(sProperty);
-        String sPrinterType = sp.nextToken(':');
-        String sPrinterParam1 = sp.nextToken(',');
-        switch (sPrinterType) {
+            case "image":
+                return new DevicePrinterImage();
             default:
                 return new DevicePrinterNull();
         }
